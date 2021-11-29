@@ -1,2 +1,2 @@
 # iannwtf_hw6
-### DISCLAIMER: Noch nicht kommentiert, keine parameter eingestellt, erste version, nicht fehlerfei
+### DISCLAIMER: Noch nicht kommentiert, keine Parameter eingestellt, erste Version, nicht fehlerfei
