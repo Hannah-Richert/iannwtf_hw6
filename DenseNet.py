@@ -15,10 +15,10 @@ class TransitionLayer(tf.keras.Model):
         """
         Performs...
           Args:
-            input: <tensorflow.tensor> our preprocessed input data, we send through our model
-            is_training: <bool> variable which determines if dropout is applied
+            input <tensorflow.tensor>: our preprocessed input data, we send through our model
+            is_training <bool>: variable which determines if dropout is applied
           Results:
-            output: <tensorflow.tensor> the predicted output of our input data
+            output <tensorflow.tensor>: the predicted output of our input data
         """
         #x = self.bn(input, training= is_training)
         x = tf.nn.relu(input)
@@ -34,6 +34,9 @@ class DenseBlock(tf.keras.Model):
     def __init__(self,filters,rep):
         """
         Constructs a residual block.
+         Args:
+           filters <int>: number of filter to apply
+           rep <int>: number of little Blocks in our big BLock
         """
         super(DenseBlock, self).__init__()
         self.little_blocks =[]
@@ -50,10 +53,10 @@ class DenseBlock(tf.keras.Model):
         """
         Performs a forward step in ...
           Args:
-            input: <tensorflow.tensor> our preprocessed input data, we send through our model
-            is_training: <bool> variable which determines if dropout is applied
+            input <tensorflow.tensor>: our preprocessed input data, we send through our model
+            is_training <bool>: variable which determines if dropout is applied
           Results:
-            output: <tensorflow.tensor> the predicted output of our input data
+            output <tensorflow.tensor>: the predicted output of our input data
         """
         x = input
         for i in range(self.rep):
@@ -82,6 +85,10 @@ class DenseNet(tf.keras.Model):
     def __init__(self,filters=12,blocks=3,block_rep=4):
         """
         Constructs our DenseNet model.
+         Args:
+           filter <int>: number of filter for our Conv layer in the DenseNet
+           blocks <int>: number of DenseBLocks in our DenseNet
+           block_rep <int>: number off little Blocks in each DenseBlock
         """
 
         super(DenseNet, self).__init__()
