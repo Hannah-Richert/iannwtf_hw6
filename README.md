@@ -1,4 +1,5 @@
 # iannwtf_hw6
 
-### DISCLAIMER: nicht kommentiert, nicht gut strukturiert, keine Parameter eingestellt, nur erste Rohversion, Fehler vorhanden, aber läuft zumindest
-Habe Repo auf privat gestellt, da mir Leute aus dem iannwtf Kurs auf Github folgen, weiß nicht ob die sonst Notification darüber bekommen ;)
+Works: sowohl ResNet als auch DenseNet scheinen mit der Version jetzt korrekt zu laufen (aber bei Densenet können sich noch Fehler eingeschlichen haben). Parameter können noch besser eingestellt werden.
+
+### TO-DO: GLaube wir müssen zumindest für Concatenate (und ggf. BatchNormaization) noch subclasses erstellen. (In der HW steht erstmal nur, dass wir Dense,Conv2D (Und ich nehme mal an auch Pooling) NICHT subclassen müssen )
