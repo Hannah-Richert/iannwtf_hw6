@@ -2,13 +2,13 @@ import tensorflow as tf
 from itertools import zip_longest
 
 class TransitionLayer(tf.keras.Model):
-    def __init__(self):
+    def __init__(self,filters):
         """
         Constructs a ....
         """
         super(TransitionLayer, self).__init__()
         self.bn = tf.keras.layers.BatchNormalization()
-        self.conv = tf.keras.layers.Conv2D(filters = 32, kernel_size=1)
+        self.conv = tf.keras.layers.Conv2D(filters*2, kernel_size=1)
         self.pool = tf.keras.layers.AveragePooling2D(pool_size = 2, strides=2,padding="same")
 
     def call(self, input,is_training):
@@ -23,6 +23,7 @@ class TransitionLayer(tf.keras.Model):
         #x = self.bn(input, training= is_training)
         x = tf.nn.relu(input)
         x = self.conv(input)
+        x = tf.nn.relu(x)
         output = self.pool(x)
 
         return output
@@ -30,20 +31,20 @@ class TransitionLayer(tf.keras.Model):
 
 class DenseBlock(tf.keras.Model):
 
-    def __init__(self,filters,num_rep):
+    def __init__(self,filters,rep):
         """
         Constructs a residual block.
         """
         super(DenseBlock, self).__init__()
         self.little_blocks =[]
-        self.num_rep = num_rep
-        self.little_blocks =[[
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Conv2D(4*filters,1,1,"same"),
-            tf.keras.layers.BatchNormalization(),
-            tf.keras.layers.Conv2D(filters,3,1,"same"),
-            tf.keras.layers.Concatenate()] for _ in range(num_rep)]
-
+        self.rep = rep
+        self.little_blocks =[
+                [tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Conv2D(4*filters,1,1,"valid"),
+                tf.keras.layers.BatchNormalization(),
+                tf.keras.layers.Conv2D(filters,3,1,"same"),
+                tf.keras.layers.Concatenate()]
+                for _ in range(rep)]
 
     def call(self, input, is_training):
         """
@@ -55,7 +56,7 @@ class DenseBlock(tf.keras.Model):
             output: <tensorflow.tensor> the predicted output of our input data
         """
         x = input
-        for i in range(self.num_rep):
+        for i in range(self.rep):
             [bn1,conv1,bn2,conv2,conc] = self.little_blocks[i]
             y = bn1(x, training = is_training)
             y = tf.nn.relu(y)
@@ -78,17 +79,21 @@ class DenseNet(tf.keras.Model):
         call: performs forward pass of our model
     """
 
-    def __init__(self,num_blocks):
+    def __init__(self,filters=12,blocks=3,block_rep=4):
         """
-        Constructs our ResNet model.
+        Constructs our DenseNet model.
         """
 
         super(DenseNet, self).__init__()
-        self.first_conv = tf.keras.layers.Conv2D(filters = 32, kernel_size = 3, strides=1,padding="same",activation='relu')
-        self.num_blocks = num_blocks
+
+        self.num_blocks = blocks
+        self.block_rep = block_rep
+
         # feature learning
-        self.blocks = [DenseBlock(filters=32,num_rep=1) for _ in range(0,num_blocks)]
-        self.trans_layers = [TransitionLayer() for _ in range(num_blocks-1)]
+        self.first_conv = tf.keras.layers.Conv2D(filters, kernel_size = 3, strides=1,padding="same")
+        self.blocks = [DenseBlock(filters, rep=self.block_rep) for _ in range(0,self.num_blocks)]
+        self.trans_layers = [TransitionLayer(filters) for _ in range(self.num_blocks - 1)]
+
         # classification
         self.bn = tf.keras.layers.BatchNormalization()
         self.global_pool = tf.keras.layers.GlobalAvgPool2D()
@@ -105,6 +110,8 @@ class DenseNet(tf.keras.Model):
             output: <tensorflow.tensor> the predicted output of our input data
         """
         x = self.first_conv(inputs,training = is_training)
+        #x = self.bn(x,training = is_training)
+        #x = tf.nn.relu(x)
 
         for i in range(self.num_blocks):
             x = self.blocks[i](x, is_training)
@@ -113,6 +120,7 @@ class DenseNet(tf.keras.Model):
 
 
         x = self.bn(x,training = is_training)
+        x = tf.nn.relu(x)
         x = self.global_pool(x,training = is_training)
         output = self.classify(x,training = is_training)
 

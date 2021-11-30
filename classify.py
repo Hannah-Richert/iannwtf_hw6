@@ -6,14 +6,14 @@ def classify(model, optimizer, num_epochs, train_ds, valid_ds):
     """
     Trains and tests our predefined model.
         Args:
-            - model: <tensorflow.keras.Model> our untrained model
-            - optimizer: <keras function> optimizer for the model
-            - num_epochs: <int> number of training epochs
-            - train_ds: <tensorflow.python.data.ops.dataset_ops.PrefetchDataset> our training dataset
-            - valid_ds: <tensorflow.python.data.ops.dataset_ops.PrefetchDataset> our validation set for testing and optimizing hyperparameters
+            - model <tensorflow.keras.Model>: our untrained model
+            - optimizer <keras function>: optimizer for the model
+            - num_epochs <int>: number of training epochs
+            - train_ds <tensorflow.python.data.ops.dataset_ops.PrefetchDataset>: our training dataset
+            - valid_ds <tensorflow.python.data.ops.dataset_ops.PrefetchDataset>: our validation set for testing and optimizing hyperparameters
         Returns:
-            - results: <list<list<float>>> list with losses and accuracies
-            - model: <tensorflow.keras.Model> our trained MLP model
+            - results <list<list<float>>>: list with losses and accuracies
+            - model <tensorflow.keras.Model>: our trained MLP model
     """
 
     tf.keras.backend.clear_session()
