@@ -27,16 +27,7 @@ class MyModel(tf.keras.Model):
         # classification
         self.l7 = tf.keras.layers.Dense(10, kernel_regularizer="l1_l2", activation='softmax')
 
-    def get_layers(self):
-        """
-        Returns list with all layers.
-
-          Returns:
-            - <list<tensorflow.keras.layer>> list with the models layers
-        """
-        return [self.l1,self.l2,self.l3,self.l4,self.l5,self.l6,self.l7]
-
-
+    @tf.function
     def call(self, input, is_training):
         """
         Performs a forward step in our MLP

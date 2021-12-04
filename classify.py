@@ -56,6 +56,6 @@ def classify(model, optimizer, num_epochs, train_ds, valid_ds):
         valid_loss, valid_accuracy = test(model, valid_ds, cross_entropy_loss,False)
         valid_losses.append(valid_loss)
         valid_accuracies.append(valid_accuracy)
-    model.summary()
+        
     results = [train_losses, valid_losses, valid_accuracies]
     return results, model

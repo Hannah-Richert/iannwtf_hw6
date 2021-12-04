@@ -18,8 +18,9 @@ def load_data():
     valid_ds = preprocess(valid_ds)
     test_ds = preprocess(test_ds)
 
-    return train_ds, valid_ds, test_ds
 
+
+    return train_ds, valid_ds, test_ds
 
 def preprocess(ds):
     """
@@ -34,19 +35,18 @@ def preprocess(ds):
     # cast labels to int32 for one hot encoding
     ds = ds.map(lambda feature, target: (tf.cast(feature, tf.float32), tf.cast(target, tf.int32)))
 
-    # normalize images and make one-hot-encode labels
+    # normalize images (range [-1,1]) and make one-hot-encode labels
     ds = ds.map(lambda feature, target: ((feature-122.5)/122.5, tf.one_hot(target, 10)))
-    # cast everything to float32
-    ds = ds.map(lambda feature, target: (tf.cast(feature, tf.float32), tf.cast(target, tf.float32)))
+    # cast targets to float32
+    ds = ds.map(lambda feature, target: (feature, tf.cast(target, tf.float32)))
 
     # cache
     ds = ds.cache()
     # shuffle, batch, prefetch our dataset
-    ds = ds.shuffle(10,000)
-    ds = ds.batch(64)
+    ds = ds.shuffle(10000)
+    ds = ds.batch(256)
     ds = ds.prefetch(20)
     return ds
-
 
 def train_step(model, input, target, loss_function, optimizer, is_training):
     """
@@ -117,7 +117,7 @@ def test(model, test_data, loss_function, is_training):
     return loss, accuracy
 
 
-def visualize(train_losses, valid_losses, valid_accuracies):
+def visualize2(train_losses, valid_losses, valid_accuracies):
     """
     Displays the losses and accuracies from the different models in a plot-grid.
       Args:
@@ -134,6 +134,34 @@ def visualize(train_losses, valid_losses, valid_accuracies):
     axs[1].sharex(axs[0])
 
     fig.legend([" Train_ds loss", " Valid_ds loss", " Valid_ds accuracy"])
+    plt.xlabel("Training epoch")
+    fig.tight_layout()
+    plt.show()
+
+def visualize(train_losses,valid_losses,valid_accuracies):
+    """
+    Displays the losses and accuracies from the different models in a plot-grid.
+    Args:
+      train_losses <list<list<float>>>: mean training losses per epoch
+      valid_losses <list<list<float>>>: mean testing losses per epoch
+      valid_accuracies <list<list<float>>>: mean accuracies (testing dataset) per epoch
+    """
+
+    titles = ["ResNet","DenseNet","SimpleModel"]
+    fig, axs = plt.subplots(1, 3)
+    #fig.set_size_inches(13, 6)
+    parameters = ["16,266","13,490","33,686"]
+    # making a grid with subplots
+    for j in range(3):
+        axs[j].plot(train_losses[j])
+        axs[j].plot(valid_losses[j])
+        axs[j].plot(valid_accuracies[j])
+        last_accuracy = valid_accuracies[j][-1].numpy()
+        axs[j].sharex(axs[0])
+        axs[j].set_title(titles[j]+" \n Last Accuracy: "+str(round(last_accuracy,4))+" \n Trainable Parameters: "+parameters[j])
+
+
+    fig.legend([" Train_ds loss"," Valid_ds loss"," Valid_ds accuracy"],loc='center right')
     plt.xlabel("Training epoch")
     fig.tight_layout()
     plt.show()
