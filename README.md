@@ -1,8 +1,8 @@
 # iannwtf_hw6
 
 ### Model parameters:
-learning-rate = 0.005
-batch-size = 256
+-learning-rate = 0.005
+-batch-size = 128
 ### TO-DO: Upscaling, comments, read.me
 
 
