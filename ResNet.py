@@ -2,7 +2,7 @@ import tensorflow as tf
 
 class ResidualBlock(tf.keras.Model):
 
-    def __init__(self,num_filters=32,out_filters=32):
+    def __init__(self,num_filters,out_filters,mode):
         """
         Constructs a residual block.
             Args:
@@ -13,17 +13,22 @@ class ResidualBlock(tf.keras.Model):
 
         self.num_filters = num_filters
         self.out_filters = out_filters
+        self.mode = mode
 
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.conv1 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 1, strides=1,padding="same")
-
         self.bn2 = tf.keras.layers.BatchNormalization()
-        self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=1,padding="same")
-
+        if mode == "normal":
+            self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=1,padding="same")
+        elif mode == "constant":
+            self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=1,padding="same")
+        elif mode == 'strided':
+            self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=2,padding="same")
+            self.pool = tf.keras.layers.MaxPool2D(pool_size=3,strides=2)
+        self.conv_resize_input = tf.keras.layers.Conv2D(filters = out_filters, kernel_size = 1, strides=1,padding="same")
         self.bn3 = tf.keras.layers.BatchNormalization()
         self.conv3 = tf.keras.layers.Conv2D(filters = out_filters, kernel_size = 1, strides=1,padding="same")
 
-        self.conv_resize_input = tf.keras.layers.Conv2D(filters = out_filters, kernel_size = 1, strides=1,padding="same")
 
 
     def call(self, input, is_training=False):
@@ -35,24 +40,28 @@ class ResidualBlock(tf.keras.Model):
           Results:
             output <tensorflow.tensor>: the predicted output of our input data
         """
-
         x = self.conv1(input)
         x = self.bn1(x,training = is_training)
         x = tf.nn.relu(x)
 
 
-        x = self.conv2(x)
+
+        if self.mode == "normal":
+            x = self.conv2(x)
+        elif self.mode == "constant":
+            x = self.conv2(x)
+        elif self.mode == 'strided':
+            x = self.conv2(x)
+            x = self.pool(x)
+        if self.num_filters != self.out_filters:
+            input = self.conv_resize_input(input)
+
         x = self.bn2(x,training = is_training)
         x = tf.nn.relu(x)
-
 
         x = self.conv3(x)
         x = self.bn3(x,training = is_training)
         x = tf.nn.relu(x)
-
-        # resizing input if input-size != processed-tensor-size (x)
-        if (self.num_filters != self.out_filters):
-            input = self.conv_resize_input(input)
 
         # adding input and processed tensor (x)
         x += input
@@ -71,7 +80,7 @@ class ResNet(tf.keras.Model):
         call: performs forward pass of our model
     """
 
-    def __init__(self,block_filters=[16,32],out_filters=[32,64],blocks=2):
+    def __init__(self,block_filters=[16,32],out_filters=[64,32],modes=["normal","constant"],blocks=2):
         """
         Constructs our ResNet model.
         Args:
@@ -82,10 +91,11 @@ class ResNet(tf.keras.Model):
         super(ResNet, self).__init__()
 
         # feature learning
-        self.first_conv = tf.keras.layers.Conv2D(filters = block_filters[0], kernel_size = 7, strides=1,padding="same", activation='relu')
-        self.pool = tf.keras.layers.MaxPool2D(pool_size=(3,3),strides=2)
+        self.first_conv = tf.keras.layers.Conv2D(filters = block_filters[0], kernel_size = 7, strides=1,padding="same")
+        self.bn = tf.keras.layers.BatchNormalization()
+
         # block filters == filters from first_conv/ previous out_filters
-        self.blocks = [ResidualBlock(num_filters=block_filters[i] ,out_filters=out_filters[i]) for i in range(blocks)]
+        self.blocks = [ResidualBlock(block_filters[i] ,out_filters[i], modes[i]) for i in range(blocks)]
 
         # classification
         self.global_pool = tf.keras.layers.GlobalAvgPool2D()
@@ -102,7 +112,8 @@ class ResNet(tf.keras.Model):
             output <tensorflow.tensor>: the predicted output of our input data
         """
         x = self.first_conv(input,training = is_training)
-        x = self.pool(x,training = is_training)
+        x = self.bn(x,training=is_training)
+        x = tf.nn.relu(x)
 
         for block in self.blocks:
             x = block(x, is_training)
