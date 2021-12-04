@@ -1,6 +1,6 @@
 # iannwtf_hw6
 
-Works: sowohl ResNet als auch DenseNet scheinen mit der Version jetzt korrekt zu laufen (aber bei Densenet können sich noch Fehler eingeschlichen haben). Parameter können noch besser eingestellt werden.
+### Um overfitting zu verhindern, habe ich in der datapipeline mehr ugmented data erstellt (Man soll kein Dropout in CNNs benutzen, laut dem Netz, und anders hatte ich keine idee) Trotzdem bekomme ich es nicht auf 85% accuracy; vielleicht kannst du damit rumspielen und fidest einen Weg. 85% ist halt hard-requirement für outstanding.
 
 ### TO-DO: Upscaling, comments, read.me
 
