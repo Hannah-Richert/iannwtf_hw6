@@ -35,17 +35,20 @@ class ResidualBlock(tf.keras.Model):
           Results:
             output <tensorflow.tensor>: the predicted output of our input data
         """
-        x = self.bn1(input,training = is_training)
-        x = tf.nn.relu(x)
-        x = self.conv1(x)
 
+        x = self.conv1(input)
+        x = self.bn1(x,training = is_training)
+        x = tf.nn.relu(x)
+
+
+        x = self.conv2(x)
         x = self.bn2(x,training = is_training)
         x = tf.nn.relu(x)
-        x = self.conv2(x)
 
+
+        x = self.conv3(x)
         x = self.bn3(x,training = is_training)
         x = tf.nn.relu(x)
-        x = self.conv3(x)
 
         # resizing input if input-size != processed-tensor-size (x)
         if (self.num_filters != self.out_filters):
@@ -68,7 +71,7 @@ class ResNet(tf.keras.Model):
         call: performs forward pass of our model
     """
 
-    def __init__(self,block_filters=[16,32,64],blocks=2):
+    def __init__(self,block_filters=[16,32],out_filters=[32,64],blocks=2):
         """
         Constructs our ResNet model.
         Args:
@@ -79,9 +82,10 @@ class ResNet(tf.keras.Model):
         super(ResNet, self).__init__()
 
         # feature learning
-        self.first_conv = tf.keras.layers.Conv2D(filters = block_filters[0], kernel_size = 3, strides=1,padding="same")
+        self.first_conv = tf.keras.layers.Conv2D(filters = block_filters[0], kernel_size = 7, strides=1,padding="same", activation='relu')
+        self.pool = tf.keras.layers.MaxPool2D(pool_size=(3,3),strides=2)
         # block filters == filters from first_conv/ previous out_filters
-        self.blocks = [ResidualBlock(num_filters=block_filters[i] ,out_filters=block_filters[i+1]) for i in range(blocks)]
+        self.blocks = [ResidualBlock(num_filters=block_filters[i] ,out_filters=out_filters[i]) for i in range(blocks)]
 
         # classification
         self.global_pool = tf.keras.layers.GlobalAvgPool2D()
@@ -98,6 +102,7 @@ class ResNet(tf.keras.Model):
             output <tensorflow.tensor>: the predicted output of our input data
         """
         x = self.first_conv(input,training = is_training)
+        x = self.pool(x,training = is_training)
 
         for block in self.blocks:
             x = block(x, is_training)
