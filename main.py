@@ -25,8 +25,8 @@ optimizer = tf.keras.optimizers.Adam(0.001, beta_1=0.9, beta_2=0.999, epsilon=1e
 # parameters(trainable) = 248,522 / accuracy (valid_ds; 10 epochs) = 59,4%
 #models = [ResNet(block_filters = [32,64,128,32], blocks = 3)]
 
-#models = [ResNet(block_filters = [8,8,8,12,12,12],out_filters=[16,16,16,24,24,24],blocks = 6)]
-models = [DenseNet(filters=4,blocks=3,block_rep=[2,6,4])]
+models = [ResNet(block_filters = [8,8,12,24],out_filters=[16,16,24,24],modes = ["normal","strifed","normal","constant"],blocks = 4)]
+#models = [DenseNet(filters=4,blocks=3,block_rep=[2,6,4])]
 
 
 # parameters(trainable) = 11.422  / accuracy (valid_ds; 10 epochs) = 56.9%
