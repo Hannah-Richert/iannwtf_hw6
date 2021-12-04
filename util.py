@@ -35,7 +35,7 @@ def preprocess(ds):
     ds = ds.map(lambda feature, target: (tf.cast(feature, tf.float32), tf.cast(target, tf.int32)))
 
     # normalize images and make one-hot-encode labels
-    ds = ds.map(lambda feature, target: (feature/255., tf.one_hot(target, 10)))
+    ds = ds.map(lambda feature, target: ((feature-122.5)/122.5, tf.one_hot(target, 10)))
     # cast everything to float32
     ds = ds.map(lambda feature, target: (tf.cast(feature, tf.float32), tf.cast(target, tf.float32)))
 
@@ -43,7 +43,7 @@ def preprocess(ds):
     ds = ds.cache()
     # shuffle, batch, prefetch our dataset
     ds = ds.shuffle(10,000)
-    ds = ds.batch(32)
+    ds = ds.batch(64)
     ds = ds.prefetch(20)
     return ds
 

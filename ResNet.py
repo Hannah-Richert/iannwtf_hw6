@@ -18,14 +18,16 @@ class ResidualBlock(tf.keras.Model):
         self.bn1 = tf.keras.layers.BatchNormalization()
         self.conv1 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 1, strides=1,padding="same")
         self.bn2 = tf.keras.layers.BatchNormalization()
-        if mode == "normal":
-            self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=1,padding="same")
-        elif mode == "constant":
-            self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=1,padding="same")
-        elif mode == 'strided':
+        if mode == 'strided':
             self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=2,padding="same")
             self.pool = tf.keras.layers.MaxPool2D(pool_size=3,strides=2)
+        # mode: normal, constant
+        else:
+            self.conv2 = tf.keras.layers.Conv2D(filters = num_filters, kernel_size = 3, strides=1,padding="same")
+
+        # layer we might need to reshape the input
         self.conv_resize_input = tf.keras.layers.Conv2D(filters = out_filters, kernel_size = 1, strides=1,padding="same")
+
         self.bn3 = tf.keras.layers.BatchNormalization()
         self.conv3 = tf.keras.layers.Conv2D(filters = out_filters, kernel_size = 1, strides=1,padding="same")
 
@@ -44,15 +46,12 @@ class ResidualBlock(tf.keras.Model):
         x = self.bn1(x,training = is_training)
         x = tf.nn.relu(x)
 
-
-
-        if self.mode == "normal":
-            x = self.conv2(x)
-        elif self.mode == "constant":
-            x = self.conv2(x)
-        elif self.mode == 'strided':
+        if self.mode == 'strided':
             x = self.conv2(x)
             x = self.pool(x)
+        else:
+            x = self.conv2(x)
+
         if self.num_filters != self.out_filters:
             input = self.conv_resize_input(input)
 
@@ -91,8 +90,9 @@ class ResNet(tf.keras.Model):
         super(ResNet, self).__init__()
 
         # feature learning
-        self.first_conv = tf.keras.layers.Conv2D(filters = block_filters[0], kernel_size = 7, strides=1,padding="same")
+        self.first_conv = tf.keras.layers.Conv2D(filters = 16, kernel_size = 7, strides=1,padding="same")
         self.bn = tf.keras.layers.BatchNormalization()
+        self.pool = tf.keras.layers.MaxPool2D(pool_size = 3,strides = 2)
 
         # block filters == filters from first_conv/ previous out_filters
         self.blocks = [ResidualBlock(block_filters[i] ,out_filters[i], modes[i]) for i in range(blocks)]
@@ -114,6 +114,7 @@ class ResNet(tf.keras.Model):
         x = self.first_conv(input,training = is_training)
         x = self.bn(x,training=is_training)
         x = tf.nn.relu(x)
+        x = self.pool(x)
 
         for block in self.blocks:
             x = block(x, is_training)
