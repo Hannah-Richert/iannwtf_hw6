@@ -33,7 +33,7 @@ class ResidualBlock(tf.keras.Model):
         self.conv3 = tf.keras.layers.Conv2D(filters = out_filters, kernel_size = 1, strides=1,padding="same")
 
 
-
+    @tf.function
     def call(self, input, is_training=False):
         """
         Performs a forward step in our ResidualBlock.
@@ -100,7 +100,7 @@ class ResNet(tf.keras.Model):
         self.global_pool = tf.keras.layers.GlobalAvgPool2D()
         self.classify = tf.keras.layers.Dense(10, kernel_regularizer="l1_l2", activation='softmax')
 
-
+    @tf.function
     def call(self, input,is_training):
         """
         Performs a forward step in our ResNet.
