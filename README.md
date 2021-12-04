@@ -1,7 +1,8 @@
 # iannwtf_hw6
 
-### Um overfitting zu verhindern, habe ich im data preprocessing mal augmented data (für training) erstellt (Man soll kein Dropout in CNNs benutzen, laut dem Netz, und anders hatte ich keine idee) Trotzdem bekomme ich es nicht auf 85% accuracy; vielleicht kannst du damit rumspielen und fidest einen Weg. 85% ist halt hard-requirement für outstanding.
-
+### Model parameters:
+learning-rate = 0.005
+batch-size = 256
 ### TO-DO: Upscaling, comments, read.me
 
 
