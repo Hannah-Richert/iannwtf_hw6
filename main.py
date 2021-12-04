@@ -13,8 +13,9 @@ tf.keras.backend.clear_session()
 train_ds, valid_ds, test_ds = load_data()
 optimizer = tf.keras.optimizers.Adam(0.001, beta_1=0.9, beta_2=0.999, epsilon=1e-07)
 
-small_models = [ResNet(block_filters = [16,24,32],blocks = 2),DenseNet(filters=6,blocks=2,block_rep=3)]
-models = small_models.append(MyModel())
+#small_models = [ResNet(block_filters = [16,24,32],blocks = 2),DenseNet(filters=6,blocks=2,block_rep=3)]
+#big_models = [ResNet(block_filters = [8,8,8,12,12,12],out_filters=[16,16,16,24,24,24],blocks = 6),]
+#models = small_models.append(MyModel())
 # parameters(trainable) = 11,834 / accuracy (valid_ds; 10 epochs) = 55.9%
 #models = [ResNet(block_filters = [16,24,32],blocks = 2)]
 # parameters(trainable) = 34,442 / accuracy (valid_ds; 10 epochs) = 56,8%
@@ -24,9 +25,9 @@ models = small_models.append(MyModel())
 # parameters(trainable) = 248,522 / accuracy (valid_ds; 10 epochs) = 59,4%
 #models = [ResNet(block_filters = [32,64,128,32], blocks = 3)]
 
+#models = [ResNet(block_filters = [8,8,8,12,12,12],out_filters=[16,16,16,24,24,24],blocks = 6)]
+models = [DenseNet(filters=4,blocks=3,block_rep=[2,6,4])]
 
-
-#models = [DenseNet(filters=12,blocks=2,block_rep=4),DenseNet(filters=12,blocks=2,block_rep=12),DenseNet(filters=12,blocks=4,block_rep=4),DenseNet(filters=36,blocks=2,block_rep=4)]
 
 # parameters(trainable) = 11.422  / accuracy (valid_ds; 10 epochs) = 56.9%
 #models = [DenseNet(filters=6,blocks=2,block_rep=3)]
@@ -48,18 +49,14 @@ models = small_models.append(MyModel())
 
 
 with tf.device('/device:gpu:0'):
-    #x_in = tf.keras.layers.Input(shape= (32,32,3))
-    #_,trained_m1 = classify(model,optimizer,1,x_in,x_in)
-    #_,trained_m2 = classify(model2,optimizer,1,x_in,x_in)
-    #_,trained_m3 = classify(model3,optimizer,1,x_in,x_in)
     # training the model
     for model in models:
-        results, trained_model = classify(model, optimizer, 15, train_ds, valid_ds)
+        results, trained_model = classify(model, optimizer, 0, train_ds, valid_ds)
 
         # testing the trained model
         # (this code snippet should only be inserted when one decided on all hyperparameters)
-        _, test_accuracy = test(trained_model, test_ds,tf.keras.losses.CategoricalCrossentropy(),False)
-        print("Accuracy (test set):", test_accuracy)
+        #_, test_accuracy = test(trained_model, test_ds,tf.keras.losses.CategoricalCrossentropy(),False)
+        #print("Accuracy (test set):", test_accuracy)
 
         # visualizing losses and accuracy
         visualize(results[0],results[1],results[2])
