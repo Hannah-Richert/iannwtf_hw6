@@ -12,8 +12,7 @@ def load_data():
           - test_ds <tensorflow.python.data.ops.dataset_ops.PrefetchDataset>: our test dataset
     """
     # train = 50.000 and test = 10.000 images
-    train_ds, valid_ds, test_ds, = tfds.load(name='cifar10', split=[
-                                             'train[0%:80%]', 'train[80%:100%]', 'test'], shuffle_files=True, as_supervised=True)
+    train_ds, valid_ds, test_ds, = tfds.load(name='cifar10', split=['train[0%:80%]','train[80%:100%]','test'], shuffle_files=True,as_supervised=True)
 
     train_ds = preprocess(train_ds)
     valid_ds = preprocess(valid_ds)
@@ -33,20 +32,17 @@ def preprocess(ds):
     """
 
     # cast labels to int32 for one hot encoding
-    ds = ds.map(lambda feature, target: (
-        tf.cast(feature, tf.float32), tf.cast(target, tf.int32)))
+    ds = ds.map(lambda feature, target: (tf.cast(feature, tf.float32), tf.cast(target, tf.int32)))
 
     # normalize images and make one-hot-encode labels
-    ds = ds.map(lambda feature, target: (
-        (feature-122.5)/122.5, tf.one_hot(target, 10)))
+    ds = ds.map(lambda feature, target: ((feature-122.5)/122.5, tf.one_hot(target, 10)))
     # cast everything to float32
-    ds = ds.map(lambda feature, target: (
-        tf.cast(feature, tf.float32), tf.cast(target, tf.float32)))
+    ds = ds.map(lambda feature, target: (tf.cast(feature, tf.float32), tf.cast(target, tf.float32)))
 
     # cache
     ds = ds.cache()
     # shuffle, batch, prefetch our dataset
-    ds = ds.shuffle(10, 000)
+    ds = ds.shuffle(10,000)
     ds = ds.batch(64)
     ds = ds.prefetch(20)
     return ds
@@ -69,7 +65,7 @@ def train_step(model, input, target, loss_function, optimizer, is_training):
     with tf.GradientTape() as tape:
 
         # forward step
-        prediction = model(input, is_training)
+        prediction = model(input,is_training)
 
         # calculating loss
         loss = loss_function(target, prediction)
@@ -104,7 +100,7 @@ def test(model, test_data, loss_function, is_training):
     for (input, target) in test_data:
 
         # forward step
-        prediction = model(input, is_training)
+        prediction = model(input,is_training)
 
         # calculating loss
         loss = loss_function(target, prediction)
@@ -112,8 +108,7 @@ def test(model, test_data, loss_function, is_training):
         # add loss and accuracy to the lists
         loss_aggregator.append(loss.numpy())
         for t, p in zip(target, prediction):
-            accuracy_aggregator.append(tf.reduce_mean(
-                tf.cast(tf.math.argmax(t) == tf.math.argmax(p), tf.float32)))
+            accuracy_aggregator.append(tf.reduce_mean(tf.cast(tf.math.argmax(t) == tf.math.argmax(p), tf.float32)))
 
     # calculate the mean of the loss and accuracy (for this epoch)
     loss = tf.reduce_mean(loss_aggregator)
@@ -131,7 +126,7 @@ def visualize(train_losses, valid_losses, valid_accuracies):
         - valid_accuracies <list>: mean accuracies (testing dataset) per epoch
     """
 
-    fig, axs = plt.subplots(2, 1)
+    fig, axs = plt.subplots(2,1)
 
     axs[0].plot(train_losses)
     axs[0].plot(valid_losses)
