@@ -44,7 +44,7 @@ def preprocess(ds):
     ds = ds.cache()
     # shuffle, batch, prefetch our dataset
     ds = ds.shuffle(10000)
-    ds = ds.batch(256)
+    ds = ds.batch(128)
     ds = ds.prefetch(20)
     return ds
 
